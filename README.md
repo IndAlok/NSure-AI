@@ -38,7 +38,8 @@ This solution was engineered to excel in all evaluation categories:
 * **Latency:**
     * **In-Memory FAISS:** Blazing-fast retrieval without network overhead.
     * **Local Embeddings:** Eliminates API calls and network latency for the embedding step.
-    * **Singleton Caching:** The entire document processing pipeline is cached after the first call, making subsequent queries extremely fast.
+    * **Instant Startup (Pre-Bundled Model):** The embedding model is "baked in" to the application, eliminating any download delay on server startup. The first API call is just as fast as any other.
+    * **Singleton Caching:** The document processing pipeline is cached in memory after the first request for a specific URL, making subsequent queries on the same document instantaneous.
 * **Token Efficiency & Cost:**
     * **Local Embeddings:** Zero cost for embedding.
     * **Optimized Prompt:** The prompt is engineered to be concise, and the `stuff` chain method is highly efficient for the context sizes we are handling.
@@ -91,7 +92,7 @@ The API is self-documenting. Once the server is running, visit `http://localhost
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/YOUR_USERNAME/NSure-AI.git](https://github.com/YOUR_USERNAME/NSure-AI.git)
+    git clone https://github.com/YOUR_USERNAME/NSure-AI.git
     cd NSure-AI
     ```
 
@@ -104,9 +105,16 @@ The API is self-documenting. Once the server is running, visit `http://localhost
 3.  **Install dependencies:**
     ```bash
     pip install -r requirements.txt
+    pip install huggingface-hub # Needed only for the one-time model download
     ```
 
-4.  **Create a `.env` file** in the root directory and add your OpenAI API key:
+4.  **Download the Embedding Model:**
+    Run the helper script to download the model files into your project. This ensures instant startup times.
+    ```bash
+    python download_model.py
+    ```
+
+5.  **Create a `.env` file** in the root directory and add your OpenAI API key:
     ```
     OPENAI_API_KEY="sk-..."
     ```
