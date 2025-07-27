@@ -26,10 +26,10 @@ The system follows a modular, cache-optimized architecture:
 3.  **RAG Core Engine (`rag_core.py`):**
     * **Document Loader (`utils.py`):** Fetches the PDF from the URL and extracts clean text using the efficient `PyMuPDF` library.
     * **Semantic Chunker:** Splits the text into meaningful, overlapping chunks using `RecursiveCharacterTextSplitter`.
-    * **Local Embedder:** Converts text chunks into vector embeddings using the fast and effective `sentence-transformers/all-MiniLM-L6-v2` model, which runs locally on the CPU.
+    * **Local Embedder:** Converts text chunks into vector embeddings using the fast and effective `BAAI/bge-small-en-v1.5` model, which runs locally on the CPU.
     * **Vector Store (FAISS):** Indexes all document chunks in an in-memory `FAISS` database for ultra-fast similarity searches.
     * **Retriever:** For a given question, it retrieves the top 5 most relevant document chunks from the FAISS index.
-    * **Generator (LLM):** An optimized prompt combines the user's question with the retrieved context and feeds it to `gpt-4-turbo` to generate a precise, factual answer.
+    * **Generator (LLM):** An optimized prompt combines the user's question with the retrieved context and feeds it to `gpt-4o-mini` to generate a precise, factual answer.
 
 ## Key Optimizations
 
@@ -51,14 +51,14 @@ This solution was engineered to excel in all evaluation categories:
 
 ## Tech Stack
 
-| Component         | Technology                               | Reason                                          |
-| ----------------- | ---------------------------------------- | ----------------------------------------------- |
-| **Web Framework** | `FastAPI`                                | High performance, automatic docs, Pydantic support. |
-| **LLM** | `OpenAI GPT-4 Turbo`                     | State-of-the-art reasoning and instruction following. |
-| **Vector DB** | `FAISS (in-memory)`                      | Extreme speed for similarity search, no setup needed. |
-| **Embeddings** | `SentenceTransformers (all-MiniLM-L6-v2)`| Fast, high-quality, and runs locally for free.      |
-| **PDF Parsing** | `PyMuPDF`                                | Superior speed and accuracy over alternatives.  |
-| **Orchestration** | `LangChain`                              | Simplifies the RAG pipeline construction.       |
+| Component         | Technology                  | Reason                                                          |
+| ----------------- | --------------------------- | --------------------------------------------------------------- |
+| **Web Framework** | `FastAPI`                   | High performance, automatic docs, Pydantic support.             |
+| **LLM** | `OpenAI GPT-4o mini`        | Superior speed and cost-effectiveness with top-tier intelligence. |
+| **Vector DB** | `FAISS (in-memory)`         | Extreme speed for similarity search, no setup needed.           |
+| **Embeddings** | `BAAI/bge-small-en-v1.5`    | Top-tier performance for speed and retrieval accuracy, runs locally. |
+| **PDF Parsing** | `PyMuPDF`                   | Superior speed and accuracy over alternatives.                  |
+| **Orchestration** | `LangChain`                 | Simplifies the RAG pipeline construction.                       |
 
 ## API Documentation
 
@@ -70,7 +70,7 @@ The API is self-documenting. Once the server is running, visit `http://localhost
 * **Authentication:** `Authorization: Bearer <your_token>`
 * **Request Body:**
     ```json
-    {
+    {turbo
       "documents": "https://path/to/your/policy.pdf",
       "questions": [
         "What is the grace period for premium payment?",
