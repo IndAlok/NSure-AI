@@ -70,12 +70,12 @@ The API is self-documenting. Once the server is running, visit `http://localhost
 * **Authentication:** `Authorization: Bearer <your_token>`
 * **Request Body:**
     ```json
-    {turbo
-      "documents": "https://path/to/your/policy.pdf",
-      "questions": [
+    {
+    "documents": "https://path/to/your/policy.pdf",
+    "questions": [
         "What is the grace period for premium payment?",
         "Does this policy cover maternity expenses?"
-      ]
+    ]
     }
     ```
 * **Success Response (200 OK):**
