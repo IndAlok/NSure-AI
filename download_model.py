@@ -3,7 +3,7 @@ from huggingface_hub import snapshot_download
 import os
 
 # The model we want to use
-model_name = "BAAI/bge-small-en-v1.5"
+model_name = "sentence-transformers/all-MiniLM-L6-v2"
 
 # The local directory where we want to save the model
 local_dir = os.path.join("models", model_name.split("/")[-1])

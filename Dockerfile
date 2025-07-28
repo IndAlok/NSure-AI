@@ -1,27 +1,48 @@
+# ---- Build Stage ----
 
-# We use 'slim' to keep the image size smaller and more efficient.
-FROM python:3.11-slim
+FROM python:3.11-slim as builder
 
-# Set the working directory inside the container
-WORKDIR /app
+# Set working directory
+WORKDIR /usr/src/app
 
-# Prevent Python from writing .pyc files to disc
+# Set environment variables to prevent Python from generating .pyc files
 ENV PYTHONDONTWRITEBYTECODE 1
-# Ensure Python output is sent straight to the terminal without buffering
 ENV PYTHONUNBUFFERED 1
 
-# Copy the file that lists our dependencies
+# Install build-time dependencies
+RUN pip install --upgrade pip
+
+# Copy requirements and install project dependencies
 COPY requirements.txt .
-
-# Install dependencies
-# --no-cache-dir makes the image smaller. --upgrade pip ensures we have the latest pip.
-RUN pip install --no-cache-dir --upgrade pip -r requirements.txt
+RUN pip wheel --no-cache-dir --wheel-dir /usr/src/app/wheels -r requirements.txt
 
 
+# Use a minimal base image for the final container to reduce size and attack surface.
+FROM python:3.11-slim
+
+# Create a non-root user for security best practices
+RUN addgroup --system app && adduser --system --group app
+
+# Set the working directory
+WORKDIR /home/app
+
+# Copy the pre-built wheels from the builder stage
+COPY --from=builder /usr/src/app/wheels /wheels
+
+# Copy the application code
 COPY . .
 
-# Expose the port that FastAPI will run on
+# Install the dependencies from the wheels without hitting the network again
+RUN pip install --no-cache /wheels/*
+
+# Change ownership of the app directory to the non-root user
+RUN chown -R app:app /home/app
+
+# Switch to the non-root user
+USER app
+
+# Expose the port the app runs on
 EXPOSE 8000
 
-# We use --host 0.0.0.0 to make the app accessible from outside the container.
+# The command to run the application
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

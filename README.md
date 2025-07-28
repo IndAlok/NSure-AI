@@ -19,46 +19,41 @@ NSure-AI is a robust Retrieval-Augmented Generation (RAG) system designed to mee
 
 ## System Architecture
 
-The system follows a modular, cache-optimized architecture:
+The system uses a production-grade architecture optimized for performance and stability on cloud platforms.
 
-1.  **API Layer (FastAPI):** Exposes a secure endpoint (`/hackrx/run`) that handles incoming requests, authentication, and response formatting.
-2.  **Caching Layer:** A smart in-memory cache ensures that a document is processed (downloaded, chunked, and embedded) only once. Subsequent queries against the same document are near-instantaneous.
-3.  **RAG Core Engine (`rag_core.py`):**
-    * **Document Loader (`utils.py`):** Fetches the PDF from the URL and extracts clean text using the efficient `PyMuPDF` library.
-    * **Semantic Chunker:** Splits the text into meaningful, overlapping chunks using `RecursiveCharacterTextSplitter`.
-    * **Local Embedder:** Converts text chunks into vector embeddings using the fast and effective `BAAI/bge-small-en-v1.5` model, which runs locally on the CPU.
-    * **Vector Store (FAISS):** Indexes all document chunks in an in-memory `FAISS` database for ultra-fast similarity searches.
-    * **Retriever:** For a given question, it retrieves the top 5 most relevant document chunks from the FAISS index.
-    * **Generator (LLM):** An optimized prompt combines the user's question with the retrieved context and feeds it to `gpt-4o-mini` to generate a precise, factual answer.
+1.  **FastAPI with Lifespan Events:** The API server pre-loads all heavy AI models (`LLM` and `Embedder`) into memory on startup. This "pre-warming" process eliminates cold-start timeouts and ensures the API is instantly ready to handle requests.
+2.  **RAG Core Engine (`rag_core.py`):**
+    * **Document Loader (`utils.py`):** Fetches and parses PDF text efficiently using `PyMuPDF`.
+    * **Local Embedder:** Uses the lightweight and highly-efficient **`sentence-transformers/all-MiniLM-L6-v2`** model, which is bundled with the application to ensure zero runtime downloads and low memory usage.
+    * **Vector Store (FAISS):** Indexes document chunks in an in-memory `FAISS` database for microsecond-level similarity searches.
+    * **Generator (LLM):** Feeds the retrieved context to **`gpt-4o-mini`** to generate precise, factual answers.
+3.  **Caching Layer:** An in-memory cache stores the processed RAG pipeline for each unique document URL, making subsequent queries on the same document instantaneous.
 
 ## Key Optimizations
 
 This solution was engineered to excel in all evaluation categories:
 
-* **Latency:**
+* **Latency & Stability:**
+    * **Lifespan Model Pre-loading:** All heavy models are loaded on server startup, not during a request. This completely solves the "cold start" 502 timeout errors common on cloud platforms.
+    * **Hyper-Efficient Local Embeddings:** Switched to the `all-MiniLM-L6-v2` model for its excellent balance of speed, accuracy, and critically, low memory footprint, ensuring stability on free-tier hosting.
     * **In-Memory FAISS:** Blazing-fast retrieval without network overhead.
-    * **Local Embeddings:** Eliminates API calls and network latency for the embedding step.
-    * **Instant Startup (Pre-Bundled Model):** The embedding model is "baked in" to the application, eliminating any download delay on server startup. The first API call is just as fast as any other.
-    * **Singleton Caching:** The document processing pipeline is cached in memory after the first request for a specific URL, making subsequent queries on the same document instantaneous.
 * **Token Efficiency & Cost:**
-    * **Local Embeddings:** Zero cost for embedding.
-    * **Optimized Prompt:** The prompt is engineered to be concise, and the `stuff` chain method is highly efficient for the context sizes we are handling.
-* **Accuracy & Explainability:**
-    * **Semantic Chunking:** Provides better, more coherent context to the LLM.
-    * **Strict Prompting:** The LLM is explicitly instructed to answer *only* from the provided context, preventing hallucinations and making every answer directly traceable to a source chunk.
+    * **Local Embeddings:** Zero API cost for creating text embeddings.
+    * **`gpt-4o-mini`:** Uses one of the most cost-effective and fastest models from OpenAI for final answer generation.
 * **Reusability & Modularity:**
-    * The code is logically separated into modules (`main.py`, `rag_core.py`, `utils.py`), making it easy to understand, maintain, and extend.
+    * **Production Dockerfile:** A multi-stage `Dockerfile` creates a small, secure, and efficient production image.
+    * **Clean Code Separation:** Logic is cleanly separated into modules (`main.py`, `rag_core.py`, `utils.py`).
 
 ## Tech Stack
 
-| Component         | Technology                  | Reason                                                          |
-| ----------------- | --------------------------- | --------------------------------------------------------------- |
-| **Web Framework** | `FastAPI`                   | High performance, automatic docs, Pydantic support.             |
-| **LLM** | `OpenAI GPT-4o mini`        | Superior speed and cost-effectiveness with top-tier intelligence. |
-| **Vector DB** | `FAISS (in-memory)`         | Extreme speed for similarity search, no setup needed.           |
-| **Embeddings** | `BAAI/bge-small-en-v1.5`    | Top-tier performance for speed and retrieval accuracy, runs locally. |
-| **PDF Parsing** | `PyMuPDF`                   | Superior speed and accuracy over alternatives.                  |
-| **Orchestration** | `LangChain`                 | Simplifies the RAG pipeline construction.                       |
+| Component         | Technology                           | Reason                                                              |
+| ----------------- | ------------------------------------ | ------------------------------------------------------------------- |
+| **Web Framework** | `FastAPI`                            | High performance, modern async features, and lifespan events.       |
+| **LLM** | `OpenAI GPT-4o mini`                 | Superior speed and cost-effectiveness with top-tier intelligence.   |
+| **Vector DB** | `FAISS (in-memory)`                  | Extreme speed for similarity search, no setup needed.               |
+| **Embeddings** | `sentence-transformers/all-MiniLM-L6-v2` | Excellent performance with a very low memory footprint for stability. |
+| **PDF Parsing** | `PyMuPDF`                            | Superior speed and accuracy over alternatives.                      |
+| **Deployment** | `Docker` / `Render`                  | Containerization for consistency and reliable cloud deployment.     |
 
 ## API Documentation
 
