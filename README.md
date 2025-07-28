@@ -53,7 +53,7 @@ This solution was engineered to excel in all evaluation categories:
 | **Vector DB** | `FAISS (in-memory)`                  | Extreme speed for similarity search, no setup needed.               |
 | **Embeddings** | `sentence-transformers/all-MiniLM-L6-v2` | Excellent performance with a very low memory footprint for stability. |
 | **PDF Parsing** | `PyMuPDF`                            | Superior speed and accuracy over alternatives.                      |
-| **Deployment** | `Docker` / `Render`                  | Containerization for consistency and reliable cloud deployment.     |
+| **Deployment** | `Docker` / `HuggingFace`                  | Containerization for consistency and reliable cloud deployment.     |
 
 ## API Documentation
 
