@@ -14,15 +14,13 @@ def intelligent_chunking(text: str, chunk_size: int, chunk_overlap: int) -> list
     2. Further splits any oversized sections recursively.
     """
     # Stage 1: Split by logical sections (clauses, sections, numbered points)
-    # This regex looks for patterns like "1. ", "a. ", "Section X", "Clause Y", etc.
-    # or multiple newlines which often separate paragraphs.
     logical_splits = re.split(r'(?m)(^\s*\d+\.\s|^\s*[a-zA-Z]\.\s|^\s*•\s|^\s*Section\s\w+|^\s*Clause\s\w+|\n\s*\n)', text)
     
     # Combine the delimiter with the text that follows it
     combined_splits = []
     i = 1
     while i < len(logical_splits):
-        # Combine the delimiter (e.g., "1. ") with the subsequent text
+        # Combine the delimiter with the subsequent text
         combined_text = (logical_splits[i] + logical_splits[i+1]).strip()
         if combined_text:
             combined_splits.append(combined_text)
@@ -67,11 +65,9 @@ class RAGCore:
         # Step 2: Embed chunks and create FAISS index
         print("Step 2: Embedding chunks and creating FAISS index...")
         self.vector_store = FAISS.from_documents(documents, embedding_model)
-        # Give the LLM more context to ensure it finds the answer.
         self.retriever = self.vector_store.as_retriever(search_kwargs={"k": 5})
         print("   -> FAISS index created successfully.")
 
-        # A more robust prompt to guide the LLM
         prompt_template = """
         You are a highly precise AI assistant for analyzing insurance policies.
         Your task is to provide a clear and accurate answer to the user's question based *only* on the provided context.
@@ -95,7 +91,6 @@ class RAGCore:
         print(f"Received query: '{question}'")
         relevant_docs = self.retriever.invoke(question)
         
-        # For debugging, you can print the retrieved context
         # print("--- Retrieved Context ---")
         # for doc in relevant_docs:
         #     print(doc.page_content)
