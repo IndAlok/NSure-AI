@@ -30,7 +30,7 @@ COPY --chown=app:app . .
 USER app
 
 # Expose port
-EXPOSE 7860
+EXPOSE 8000
 
 # Start command
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "7860"]
+CMD ["uvicorn", "main:app", "--host", "localhost", "--port", "8000"]

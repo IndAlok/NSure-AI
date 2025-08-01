@@ -1,9 +1,9 @@
 fastapi>=0.104.0
 uvicorn[standard]>=0.24.0
 python-dotenv>=1.0.0
-openai>=1.6.1,<2.0.0
+google-generativeai>=0.3.0
 langchain>=0.0.340
-langchain-openai>=0.0.2
+langchain-google-genai>=1.0.0
 langchain_community>=0.0.8
 langchain-huggingface>=0.0.1
 sentence-transformers>=2.2.0

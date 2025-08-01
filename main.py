@@ -20,7 +20,7 @@ pipeline_cache = {}
 async def lifespan(app: FastAPI):
     print("--- Loading AI models... ---")
     from langchain_huggingface import HuggingFaceEmbeddings
-    from langchain_openai import ChatOpenAI
+    from langchain_google_genai import ChatGoogleGenerativeAI
     from dotenv import load_dotenv
     import tempfile
 
@@ -37,8 +37,12 @@ async def lifespan(app: FastAPI):
         )
         print("✅ Embeddings loaded")
 
-        model_cache["llm"] = ChatOpenAI(model="gpt-4o-mini", temperature=0.1)
-        print("✅ LLM loaded")
+        model_cache["llm"] = ChatGoogleGenerativeAI(
+            model="gemini-1.5-flash", 
+            temperature=0.1,  # Low temperature for accuracy
+            convert_system_message_to_human=True
+        )
+        print("✅ LLM loaded (Gemini 1.5 Flash)")
         print("🚀 Ready to serve requests!")
     except Exception as e:
         print(f"❌ Error loading models: {e}")
@@ -48,6 +52,13 @@ async def lifespan(app: FastAPI):
                 model_kwargs={'device': 'cpu'}
             )
             print("✅ Embeddings loaded (fallback)")
+            
+            # Fallback LLM with basic settings
+            model_cache["llm"] = ChatGoogleGenerativeAI(
+                model="gemini-1.5-flash",
+                temperature=0.1
+            )
+            print("✅ LLM loaded (fallback - Gemini 1.5 Flash)")
         except Exception as e2:
             print(f"❌ Complete failure: {e2}")
             raise e2
@@ -109,9 +120,19 @@ async def process_document(request: QueryRequest, token: str = Depends(check_aut
             print(f"❌ Pipeline creation failed: {e}")
             raise HTTPException(status_code=500, detail=f"Document processing failed: {str(e)}")
 
-    answers = []
-    for q in request.questions:
-        answer = rag.answer_question(q)
-        answers.append(answer)
+    # Always use batch processing for better performance
+    try:
+        answers = rag.batch_answer_questions(request.questions)
+    except Exception as e:
+        print(f"❌ Batch processing failed, falling back to sequential: {e}")
+        # Fallback to sequential processing if batch fails
+        answers = []
+        for q in request.questions:
+            try:
+                answer = rag.answer_question(q)
+                answers.append(answer)
+            except Exception as single_e:
+                print(f"❌ Single question failed: {single_e}")
+                answers.append(f"Error processing question: {str(single_e)}")
 
     return QueryResponse(answers=answers)

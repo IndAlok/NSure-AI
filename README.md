@@ -118,7 +118,7 @@ echo "OPENAI_API_KEY=your-key-here" > .env
 ### Docker Build
 ```bash
 docker build -t nsure-ai .
-docker run -p 7860:7860 nsure-ai
+docker run -p 8000:8000 nsure-ai
 ```
 
 ## Why These Choices?
