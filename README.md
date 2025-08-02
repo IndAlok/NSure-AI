@@ -150,5 +150,5 @@ docker run -p 8000:8000 nsure-ai
 - Ensure OpenAI API key has credits
 
 ---
-
+uvicorn main:app --host localhost --port 8000
 *Built for HackRx 2025 | Made with ☕ and determination*

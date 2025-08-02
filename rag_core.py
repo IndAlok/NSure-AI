@@ -75,6 +75,7 @@ FORMATTING RULES:
 - For yes/no questions, start with "Yes" or "No" then provide key details
 - Limit to 1-2 sentences for most answers
 - Focus on the most important facts that directly answer the question
+- Understand technical terms related to the question and answer accordingly
 - Avoid unnecessary explanatory phrases
 
 Examples of desired format:

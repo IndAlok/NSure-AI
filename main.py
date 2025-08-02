@@ -38,7 +38,7 @@ async def lifespan(app: FastAPI):
         print("✅ Embeddings loaded")
 
         model_cache["llm"] = ChatGoogleGenerativeAI(
-            model="gemini-1.5-flash", 
+            model="gemini-2.5-pro", 
             temperature=0.1,  # Low temperature for accuracy
             convert_system_message_to_human=True
         )
