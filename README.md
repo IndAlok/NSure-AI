@@ -58,7 +58,7 @@ uvicorn main:app --reload
 ## Tech Stack
 
 - **Backend**: FastAPI + Python
-- **AI Models**: Google Gemini 2.0 Flash + Sentence Transformers
+- **AI Models**: Google Gemini 1.5 Pro + Sentence Transformers
 - **Vector DB**: FAISS (in-memory)
 - **PDF Parser**: PyMuPDF
 - **Deployment**: Docker + HuggingFace Spaces
@@ -123,7 +123,7 @@ docker run -p 7860:7860 nsure-ai
 
 ## Why These Choices?
 
-- **Gemini 2.5 Flash**: Google's fastest and most capable model with excellent accuracy
+- **Gemini 1.5 Pro**: Google's fastest and most capable model with excellent accuracy
 - **Local Embeddings**: No API costs for document processing
 - **FAISS**: Fastest vector search without external dependencies
 - **FastAPI**: Modern async framework with auto-documentation
