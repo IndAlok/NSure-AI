@@ -30,7 +30,7 @@ Request → FastAPI → Hybrid Retriever → Gemini LLM → Response
 | API Layer | FastAPI | Async request handling with automatic OpenAPI docs |
 | Embeddings | Google text-embedding-004 | High-quality semantic embeddings via API |
 | Vector Search | NumPy cosine similarity | Lightweight in-memory similarity search |
-| LLM | Google Gemini 1.5 Pro | Answer generation |
+| LLM | Google Gemini 2.5 Flash | Answer generation |
 | Cache | PostgreSQL (asyncpg) | Persistent document and query caching |
 | PDF Parser | PyMuPDF | Fast, accurate text extraction |
 

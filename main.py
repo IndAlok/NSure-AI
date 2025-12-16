@@ -63,7 +63,7 @@ async def lifespan(app: FastAPI):
         )
 
         model_cache["llm"] = ChatGoogleGenerativeAI(
-            model="gemini-1.5-pro", 
+            model="gemini-2.5-flash", 
             temperature=0.1,
             max_tokens=80,
             timeout=25,
