@@ -99,6 +99,11 @@ app = FastAPI(
 app.add_middleware(GZipMiddleware, minimum_size=500)
 
 from rag_core import OptimizedRAGCore
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+import os
+
+app.mount("/public", StaticFiles(directory="public"), name="public")
 
 bearer_auth = HTTPBearer()
 
@@ -123,9 +128,17 @@ class QueryRequest(BaseModel):
 class QueryResponse(BaseModel):
     answers: List[str]
 
-@app.get("/", include_in_schema=False)
+@app.get("/", response_class=HTMLResponse, include_in_schema=False)
 def home():
-    return {"status": "running", "service": "NSure-AI"}
+    html_path = os.path.join(os.path.dirname(__file__), "index.html")
+    if os.path.exists(html_path):
+        with open(html_path, 'r', encoding='utf-8') as f:
+            return f.read()
+    return """<!DOCTYPE html>
+<html><head><title>NSure-AI</title>
+<link rel="icon" type="image/png" href="/public/favicon.png">
+<link rel="shortcut icon" href="/public/favicon.ico">
+</head><body><h1>NSure-AI API</h1><p>Running</p></body></html>"""
 
 @app.get("/health")
 def health():
