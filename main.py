@@ -132,7 +132,8 @@ def home():
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NSure-AI - Insurance Document Analysis API</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%231e3a8a'/><stop offset='100%' style='stop-color:%233b82f6'/></linearGradient></defs><path d='M50 10 L80 25 L80 60 Q80 80 50 90 Q20 80 20 60 L20 25 Z' fill='url(%23g)' stroke='white' stroke-width='2'/><path d='M50 30 L65 37 L65 60 Q65 70 50 75 Q35 70 35 60 L35 37 Z' fill='white' opacity='0.3'/></svg>">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="shortcut icon" href="/favicon.ico">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -190,7 +191,7 @@ def home():
 </head>
 <body>
     <div class="container">
-        <div class="status">API Running</div>
+        <div class="status">🟢 API Running</div>
         <h1>NSure-AI</h1>
         <p>Intelligent Insurance Document Analysis API</p>
         <div class="links">
@@ -200,6 +201,51 @@ def home():
     </div>
 </body>
 </html>"""
+
+@app.get("/favicon.svg", include_in_schema=False)
+def favicon_svg():
+    from fastapi.responses import Response
+    svg_content = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<defs>
+<linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+<stop offset="0%" style="stop-color:#1e3a8a"/>
+<stop offset="100%" style="stop-color:#3b82f6"/>
+</linearGradient>
+</defs>
+<path d="M50 10 L80 25 L80 60 Q80 80 50 90 Q20 80 20 60 L20 25 Z" fill="url(#g)" stroke="white" stroke-width="2"/>
+<path d="M50 30 L65 37 L65 60 Q65 70 50 75 Q35 70 35 60 L35 37 Z" fill="white" opacity="0.3"/>
+</svg>"""
+    return Response(content=svg_content, media_type="image/svg+xml")
+
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon_ico():
+    from fastapi.responses import Response
+    svg_content = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<defs>
+<linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+<stop offset="0%" style="stop-color:#1e3a8a"/>
+<stop offset="100%" style="stop-color:#3b82f6"/>
+</linearGradient>
+</defs>
+<path d="M50 10 L80 25 L80 60 Q80 80 50 90 Q20 80 20 60 L20 25 Z" fill="url(#g)" stroke="white" stroke-width="2"/>
+<path d="M50 30 L65 37 L65 60 Q65 70 50 75 Q35 70 35 60 L35 37 Z" fill="white" opacity="0.3"/>
+</svg>"""
+    return Response(content=svg_content, media_type="image/svg+xml")
+
+@app.get("/favicon.png", include_in_schema=False)
+def favicon_png():
+    from fastapi.responses import Response
+    svg_content = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<defs>
+<linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+<stop offset="0%" style="stop-color:#1e3a8a"/>
+<stop offset="100%" style="stop-color:#3b82f6"/>
+</linearGradient>
+</defs>
+<path d="M50 10 L80 25 L80 60 Q80 80 50 90 Q20 80 20 60 L20 25 Z" fill="url(#g)" stroke="white" stroke-width="2"/>
+<path d="M50 30 L65 37 L65 60 Q65 70 50 75 Q35 70 35 60 L35 37 Z" fill="white" opacity="0.3"/>
+</svg>"""
+    return Response(content=svg_content, media_type="image/svg+xml")
 
 @app.get("/health")
 def health():
