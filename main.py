@@ -129,11 +129,21 @@ def home():
 
 @app.get("/favicon.ico", include_in_schema=False)
 def favicon():
+    from fastapi.responses import FileResponse
+    import os
+    favicon_path = os.path.join(os.path.dirname(__file__), "favicon.ico")
+    if os.path.exists(favicon_path):
+        return FileResponse(favicon_path, media_type="image/x-icon")
     from fastapi.responses import Response
     return Response(status_code=204)
 
 @app.get("/favicon.png", include_in_schema=False)
 def favicon_png():
+    from fastapi.responses import FileResponse
+    import os
+    favicon_path = os.path.join(os.path.dirname(__file__), "favicon.png")
+    if os.path.exists(favicon_path):
+        return FileResponse(favicon_path, media_type="image/png")
     from fastapi.responses import Response
     return Response(status_code=204)
 
