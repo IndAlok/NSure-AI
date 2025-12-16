@@ -265,7 +265,7 @@ def favicon_png():
 def health():
     return {"status": "healthy"}
 
-@app.post("/hackrx/run", response_model=QueryResponse)
+@app.post("/indalok/run", response_model=QueryResponse)
 async def query_documents(
     request: QueryRequest,
     token: str = Depends(check_auth)

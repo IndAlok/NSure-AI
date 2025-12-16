@@ -36,7 +36,7 @@ Request → FastAPI → Hybrid Retriever → Gemini LLM → Response
 
 ## API Reference
 
-### POST /hackrx/run
+### POST /indalok/run
 
 Analyze an insurance document and answer questions.
 
