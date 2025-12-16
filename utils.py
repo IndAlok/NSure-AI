@@ -1,14 +1,11 @@
 import requests
-import fitz  # PyMuPDF
+import fitz
 import re
 from functools import lru_cache
 from typing import Optional, List
 
 @lru_cache(maxsize=32)
 def get_pdf_text_from_url(url: str) -> Optional[str]:
-    """
-    Downloads a PDF from a URL and extracts clean text content.
-    """
     try:
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
         response = requests.get(url, headers=headers, timeout=30, allow_redirects=True)
@@ -20,13 +17,9 @@ def get_pdf_text_from_url(url: str) -> Optional[str]:
         for page in doc:
             page_text = page.get_text("text", flags=fitz.TEXT_PRESERVE_LIGATURES)
             
-            # 1. Normalize all whitespace to single spaces
             cleaned_text = re.sub(r'\s+', ' ', page_text).strip()
-            
-            # 2. Re-join words that are hyphenated across lines
             cleaned_text = re.sub(r'-\s+', '', cleaned_text)
             
-            # 3. Targeted removal of known, repetitive footers. This is much safer.
             footer_patterns = [
                 r"National Insurance Co\. Ltd\.\s+Premises No\. 18-0374, Plot no\. CBD-81,\s+New Town, Kolkata - \d+",
                 r"Page \d+ of \d+",
@@ -41,11 +34,9 @@ def get_pdf_text_from_url(url: str) -> Optional[str]:
         final_text = ' '.join(full_text)
         return final_text if len(final_text) > 100 else None
 
-    except requests.exceptions.RequestException as e:
-        print(f"PDF download error from URL {url}: {e}")
+    except requests.exceptions.RequestException:
         return None
-    except Exception as e:
-        print(f"PDF text extraction error for URL {url}: {e}")
+    except Exception:
         return None
 
 def semantic_chunker(text: str, chunk_size: int = 1000, overlap: int = 150) -> List[str]:

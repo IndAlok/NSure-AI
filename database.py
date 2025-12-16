@@ -15,47 +15,30 @@ class PostgresCache:
         try:
             self.pool = await asyncpg.create_pool(
                 database_url,
-                min_size=2,
-                max_size=10,
-                command_timeout=15, # Increased timeout for reliability
+                min_size=1,
+                max_size=5,
+                command_timeout=15,
                 server_settings={'jit': 'off'}
             )
-            # Ensure tables are created on initialization
             await self._create_tables()
-            print("✅ Database pool created and tables ensured.")
-        except Exception as e:
-            print(f"❌ Failed to initialize database pool: {e}")
+        except Exception:
             self.pool = None
 
-
     async def initialize_and_clear_cache(self):
-        """
-        Initializes and, if configured, wipes the cache tables.
-        This now targets the correct tables: `doc_cache` and `query_cache`.
-        """
         if not self.pool:
-            print("⚠️ Cannot clear cache, database pool is not initialized.")
             return
 
-        # The environment variable check to trigger the cache wipe
         if os.getenv("CLEAR_CACHE_ON_RESTART", "false").lower() == "true":
-            print("🔥 CLEAR_CACHE_ON_RESTART is true. Wiping database cache...")
             try:
                 async with self.pool.acquire() as connection:
-                    # This command truncates BOTH active tables.
-                    # TRUNCATE is much faster than DELETE for wiping entire tables.
                     await connection.execute("TRUNCATE TABLE doc_cache, query_cache RESTART IDENTITY CASCADE;")
-                    print("✅ Database cache tables (doc_cache, query_cache) cleared successfully.")
-            except Exception as e:
-                print(f"❌ Error while truncating tables: {e}")
-
+            except Exception:
+                pass
 
     async def _create_tables(self):
-        """Creates the necessary tables if they don't already exist."""
         if not self.pool:
             return
         async with self.pool.acquire() as conn:
-            # Added `pg_trgm` extension for potential future fuzzy string matching
             await conn.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm;")
             await conn.execute("""
                 CREATE TABLE IF NOT EXISTS doc_cache (
@@ -118,10 +101,8 @@ class PostgresCache:
 
     async def cleanup_old_cache(self, days: int = 7):
         if not self.pool: return
-        print(f"🧹 Cleaning up cache entries older than {days} days...")
         async with self.pool.acquire() as conn:
             await conn.execute("DELETE FROM doc_cache WHERE created_at < NOW() - INTERVAL '%s days'", str(days))
             await conn.execute("DELETE FROM query_cache WHERE created_at < NOW() - INTERVAL '%s days'", str(days))
-        print("✅ Old cache entries cleaned up.")
 
 db_cache = PostgresCache()

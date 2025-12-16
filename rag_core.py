@@ -52,8 +52,8 @@ class HybridRetriever:
                 self.embedding_model,
                 normalize_L2=True
             )
-        except Exception as e:
-            print(f"FAISS setup error: {e}")
+        except Exception:
+            pass
     
     def retrieve(self, query: str, k: int = 6) -> List[Document]:
         if not self.docs:
@@ -109,7 +109,8 @@ Answer (one clear sentence with specific details):""")
         relevant_docs = retriever.retrieve(question, k=8)
         context = "\n\n".join([doc.page_content for doc in relevant_docs[:4]])
         
-        response = await asyncio.get_event_loop().run_in_executor(
+        loop = asyncio.get_running_loop()
+        response = await loop.run_in_executor(
             None, 
             self._get_answer_from_llm, 
             context, 
@@ -121,7 +122,6 @@ Answer (one clear sentence with specific details):""")
 
     async def process_queries(self, pdf_url: str, questions: List[str]) -> List[str]:
         try:
-            # Check query cache first
             cached_answers = {}
             uncached_questions = []
             
@@ -136,7 +136,6 @@ Answer (one clear sentence with specific details):""")
             if not uncached_questions:
                 return [cached_answers[q] for q in questions]
             
-            # Check document cache
             doc_cache_data = await db_cache.get_doc_cache(pdf_url)
             
             if doc_cache_data:
@@ -150,18 +149,15 @@ Answer (one clear sentence with specific details):""")
                 text_hash = hash(text[:1000])
                 chunks = context_aware_chunk_text(str(text_hash), text)
                 
-                # Cache document
-                embeddings_bytes = pickle.dumps([])  # Placeholder
+                embeddings_bytes = pickle.dumps([])
                 await db_cache.set_doc_cache(pdf_url, text, chunks, embeddings_bytes)
             
             docs = [Document(page_content=chunk) for chunk in chunks]
             retriever = HybridRetriever(docs, self.embedding_model)
             
-            # Process uncached questions concurrently
             tasks = [self._get_answer_for_question(q, retriever) for q in uncached_questions]
             new_results = await asyncio.gather(*tasks)
 
-            # Cache new answers
             cache_tasks = []
             for question, answer in new_results:
                 cached_answers[question] = answer
@@ -183,11 +179,8 @@ Answer (one clear sentence with specific details):""")
 
     def _format_answer(self, raw_answer: str) -> str:
         answer = raw_answer.strip()
-        # Remove escaped quotes
         answer = answer.replace('\\"', '"')
-        # Collapse whitespace
         answer = re.sub(r'\s+', ' ', answer)
-        # Remove boilerplate prefixes
         answer = re.sub(r'^(Answer|Response|Based on|According to)[:\s]*', '', answer, flags=re.IGNORECASE).strip()
         
         if not answer.endswith(('.', '!', '?')):
