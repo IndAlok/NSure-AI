@@ -132,6 +132,11 @@ def favicon():
     from fastapi.responses import Response
     return Response(status_code=204)
 
+@app.get("/favicon.png", include_in_schema=False)
+def favicon_png():
+    from fastapi.responses import Response
+    return Response(status_code=204)
+
 @app.get("/health")
 def health():
     return {"status": "healthy"}
