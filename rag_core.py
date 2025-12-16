@@ -5,7 +5,7 @@ import pickle
 from typing import List, Tuple
 from functools import lru_cache
 from langchain_core.documents import Document
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.prompts import ChatPromptTemplate
 from utils import get_pdf_text_from_url
 from rank_bm25 import BM25Okapi

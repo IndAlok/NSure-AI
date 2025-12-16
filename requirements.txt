@@ -1,8 +1,8 @@
 fastapi>=0.104.0
 uvicorn[standard]>=0.24.0
 pydantic>=2.5.0
-langchain>=0.1.0
-langchain-community>=0.0.10
+langchain-core>=0.1.0
+langchain-text-splitters>=0.0.1
 langchain-google-genai>=1.0.0
 PyMuPDF>=1.23.0
 python-dotenv>=1.0.0
