@@ -230,7 +230,14 @@ def favicon_ico():
 <path d="M50 10 L80 25 L80 60 Q80 80 50 90 Q20 80 20 60 L20 25 Z" fill="url(#g)" stroke="white" stroke-width="2"/>
 <path d="M50 30 L65 37 L65 60 Q65 70 50 75 Q35 70 35 60 L35 37 Z" fill="white" opacity="0.3"/>
 </svg>"""
-    return Response(content=svg_content, media_type="image/svg+xml")
+    return Response(
+        content=svg_content, 
+        media_type="image/svg+xml",
+        headers={
+            "Cache-Control": "public, max-age=86400",
+            "X-Content-Type-Options": "nosniff"
+        }
+    )
 
 @app.get("/favicon.png", include_in_schema=False)
 def favicon_png():
@@ -245,7 +252,14 @@ def favicon_png():
 <path d="M50 10 L80 25 L80 60 Q80 80 50 90 Q20 80 20 60 L20 25 Z" fill="url(#g)" stroke="white" stroke-width="2"/>
 <path d="M50 30 L65 37 L65 60 Q65 70 50 75 Q35 70 35 60 L35 37 Z" fill="white" opacity="0.3"/>
 </svg>"""
-    return Response(content=svg_content, media_type="image/svg+xml")
+    return Response(
+        content=svg_content, 
+        media_type="image/svg+xml",
+        headers={
+            "Cache-Control": "public, max-age=86400",
+            "X-Content-Type-Options": "nosniff"
+        }
+    )
 
 @app.get("/health")
 def health():
