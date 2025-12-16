@@ -127,6 +127,11 @@ class QueryResponse(BaseModel):
 def home():
     return {"status": "running", "service": "NSure-AI"}
 
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    from fastapi.responses import Response
+    return Response(status_code=204)
+
 @app.get("/health")
 def health():
     return {"status": "healthy"}
