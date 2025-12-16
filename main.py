@@ -100,10 +100,6 @@ app.add_middleware(GZipMiddleware, minimum_size=500)
 
 from rag_core import OptimizedRAGCore
 from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
-import os
-
-app.mount("/public", StaticFiles(directory="public"), name="public")
 
 bearer_auth = HTTPBearer()
 
@@ -130,15 +126,80 @@ class QueryResponse(BaseModel):
 
 @app.get("/", response_class=HTMLResponse, include_in_schema=False)
 def home():
-    html_path = os.path.join(os.path.dirname(__file__), "index.html")
-    if os.path.exists(html_path):
-        with open(html_path, 'r', encoding='utf-8') as f:
-            return f.read()
     return """<!DOCTYPE html>
-<html><head><title>NSure-AI</title>
-<link rel="icon" type="image/png" href="/public/favicon.png">
-<link rel="shortcut icon" href="/public/favicon.ico">
-</head><body><h1>NSure-AI API</h1><p>Running</p></body></html>"""
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NSure-AI - Insurance Document Analysis API</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%231e3a8a'/><stop offset='100%' style='stop-color:%233b82f6'/></linearGradient></defs><path d='M50 10 L80 25 L80 60 Q80 80 50 90 Q20 80 20 60 L20 25 Z' fill='url(%23g)' stroke='white' stroke-width='2'/><path d='M50 30 L65 37 L65 60 Q65 70 50 75 Q35 70 35 60 L35 37 Z' fill='white' opacity='0.3'/></svg>">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        .container {
+            text-align: center;
+            max-width: 600px;
+            padding: 2rem;
+        }
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+        p {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+        .status {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+        .links {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        a {
+            background: white;
+            color: #1e3a8a;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="status">API Running</div>
+        <h1>NSure-AI</h1>
+        <p>Intelligent Insurance Document Analysis API</p>
+        <div class="links">
+            <a href="/docs" target="_blank">API Documentation</a>
+            <a href="/health" target="_blank">Health Check</a>
+        </div>
+    </div>
+</body>
+</html>"""
 
 @app.get("/health")
 def health():
