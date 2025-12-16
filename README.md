@@ -1,12 +1,12 @@
 # NSure-AI
 
-An intelligent document analysis API that extracts precise answers from insurance policy PDFs using retrieval-augmented generation (RAG). Built with FastAPI and Google Gemini, designed for production deployment.
+An intelligent document analysis API that extracts precise answers from insurance policy PDFs using retrieval-augmented generation (RAG). Built with FastAPI and Google Gemini, optimized for serverless deployment.
 
 ## Key Features
 
-- **Hybrid Retrieval System**: Combines BM25 keyword matching with FAISS vector similarity search for superior document retrieval accuracy
+- **Hybrid Retrieval System**: Combines BM25 keyword matching with semantic vector similarity for superior document retrieval accuracy
 - **Intelligent Caching**: PostgreSQL-backed caching layer eliminates redundant processing, reducing response times for repeated queries by 95%
-- **Production-Ready Architecture**: Async-first design with connection pooling, automatic retry logic, and graceful error handling
+- **Serverless-Optimized**: Lightweight architecture using Google's embedding API, deployable on Vercel with minimal cold start times
 - **Accurate Answer Extraction**: Fine-tuned prompts with Gemini 1.5 Pro ensure concise, policy-specific responses
 
 ## Technical Architecture
@@ -16,7 +16,7 @@ Request → FastAPI → Hybrid Retriever → Gemini LLM → Response
                          │
               ┌──────────┴──────────┐
               │                     │
-         BM25 (Keyword)      FAISS (Semantic)
+         BM25 (Keyword)      Vector (Semantic)
               │                     │
               └──────────┬──────────┘
                          │
@@ -28,8 +28,8 @@ Request → FastAPI → Hybrid Retriever → Gemini LLM → Response
 | Component | Technology | Purpose |
 |-----------|------------|---------|
 | API Layer | FastAPI | Async request handling with automatic OpenAPI docs |
-| Embeddings | sentence-transformers/all-MiniLM-L6-v2 | Local semantic embeddings (no API costs) |
-| Vector Store | FAISS | In-memory similarity search |
+| Embeddings | Google text-embedding-004 | High-quality semantic embeddings via API |
+| Vector Search | NumPy cosine similarity | Lightweight in-memory similarity search |
 | LLM | Google Gemini 1.5 Pro | Answer generation |
 | Cache | PostgreSQL (asyncpg) | Persistent document and query caching |
 | PDF Parser | PyMuPDF | Fast, accurate text extraction |
@@ -94,17 +94,8 @@ Health check endpoint for monitoring.
 git clone https://github.com/IndAlok/NSure-AI.git
 cd NSure-AI
 pip install -r requirements.txt
-# Create .env file with required variables
 uvicorn main:app --reload
 ```
-
-## Performance Optimizations
-
-- **Pre-loaded Models**: Embedding model loads at startup, not per-request
-- **Connection Pooling**: Database connections reused across requests
-- **LRU Caching**: Document text and chunks cached in memory
-- **GZip Compression**: Responses compressed for faster transfer
-- **Async Processing**: Concurrent question answering when possible
 
 ## Project Structure
 

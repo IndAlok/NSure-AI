@@ -1,13 +1,11 @@
 import re
 import asyncio
-import concurrent.futures
 import numpy as np
 import pickle
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 from functools import lru_cache
 from langchain_core.documents import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import ChatPromptTemplate
 from utils import get_pdf_text_from_url
 from rank_bm25 import BM25Okapi
@@ -35,7 +33,7 @@ class HybridRetriever:
         self.docs = docs
         self.embedding_model = embedding_model
         self.bm25 = None
-        self.vector_store = None
+        self.doc_embeddings = None
         self._setup_retrievers()
     
     def _setup_retrievers(self):
@@ -47,42 +45,48 @@ class HybridRetriever:
         self.bm25 = BM25Okapi(tokenized_texts)
         
         try:
-            self.vector_store = FAISS.from_documents(
-                self.docs, 
-                self.embedding_model,
-                normalize_L2=True
-            )
+            self.doc_embeddings = self.embedding_model.embed_documents(texts)
         except Exception:
-            pass
+            self.doc_embeddings = None
+    
+    def _cosine_similarity(self, a: List[float], b: List[float]) -> float:
+        a_arr = np.array(a)
+        b_arr = np.array(b)
+        return np.dot(a_arr, b_arr) / (np.linalg.norm(a_arr) * np.linalg.norm(b_arr) + 1e-8)
     
     def retrieve(self, query: str, k: int = 6) -> List[Document]:
         if not self.docs:
             return []
         
         results = []
+        scores = {}
         
         if self.bm25:
             tokenized_query = query.lower().split()
             bm25_scores = self.bm25.get_scores(tokenized_query)
-            bm25_top_k = np.argsort(bm25_scores)[-k:][::-1]
-            results.extend([self.docs[i] for i in bm25_top_k if bm25_scores[i] > 0])
+            for i, score in enumerate(bm25_scores):
+                if score > 0:
+                    scores[i] = scores.get(i, 0) + score * 0.4
         
-        if self.vector_store:
+        if self.doc_embeddings:
             try:
-                vector_docs = self.vector_store.similarity_search(query, k=k)
-                results.extend(vector_docs)
+                query_embedding = self.embedding_model.embed_query(query)
+                for i, doc_emb in enumerate(self.doc_embeddings):
+                    sim = self._cosine_similarity(query_embedding, doc_emb)
+                    scores[i] = scores.get(i, 0) + sim * 0.6
             except Exception:
                 pass
         
+        sorted_indices = sorted(scores.keys(), key=lambda x: scores[x], reverse=True)
+        
         seen = set()
-        unique_results = []
-        for doc in results:
-            content_hash = hash(doc.page_content[:100])
+        for i in sorted_indices[:k]:
+            content_hash = hash(self.docs[i].page_content[:100])
             if content_hash not in seen:
                 seen.add(content_hash)
-                unique_results.append(doc)
+                results.append(self.docs[i])
         
-        return unique_results[:k]
+        return results
 
 class OptimizedRAGCore:
     def __init__(self, embedding_model, llm):

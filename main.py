@@ -1,35 +1,18 @@
 import warnings
 import os
 import asyncio
-import hashlib
 import time
 import functools
-import pickle
-import sys
 from contextlib import asynccontextmanager
-from concurrent.futures import ThreadPoolExecutor
 from fastapi import FastAPI, Depends, HTTPException, status, Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.gzip import GZipMiddleware
 from pydantic import BaseModel, Field
-from typing import List, Dict
+from typing import List
 
 warnings.filterwarnings("ignore")
 
-if sys.platform != "win32":
-    try:
-        import uvloop
-        asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-    except ImportError:
-        pass
-
-os.environ["HF_HOME"] = "/tmp/hf_cache"
-os.environ["TRANSFORMERS_CACHE"] = "/tmp/hf_cache/transformers"
-os.environ["TOKENIZERS_PARALLELISM"] = "false"
-
 model_cache = {}
-pipeline_cache = {}
-executor = ThreadPoolExecutor(max_workers=6, thread_name_prefix="rag_worker")
 
 def timed_cache(maxsize=128, ttl=3600):
     def decorator(func):
@@ -59,8 +42,7 @@ def timed_cache(maxsize=128, ttl=3600):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    from langchain_huggingface import HuggingFaceEmbeddings
-    from langchain_google_genai import ChatGoogleGenerativeAI
+    from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
     from dotenv import load_dotenv
     from database import db_cache
     
@@ -73,15 +55,11 @@ async def lifespan(app: FastAPI):
 
         await db_cache.initialize_and_clear_cache()
 
-        model_name = 'sentence-transformers/all-MiniLM-L6-v2'
-        model_kwargs = {'device': 'cpu'}
-        encode_kwargs = {'normalize_embeddings': True}
-
-        model_cache["embedding_model"] = HuggingFaceEmbeddings(
-            model_name=model_name,
-            model_kwargs=model_kwargs,
-            encode_kwargs=encode_kwargs,
-            cache_folder='/tmp/hf_cache'
+        google_api_key = os.getenv("GOOGLE_API_KEY")
+        
+        model_cache["embedding_model"] = GoogleGenerativeAIEmbeddings(
+            model="models/text-embedding-004",
+            google_api_key=google_api_key
         )
 
         model_cache["llm"] = ChatGoogleGenerativeAI(
@@ -90,7 +68,7 @@ async def lifespan(app: FastAPI):
             max_tokens=80,
             timeout=25,
             max_retries=2,
-            google_api_key=os.getenv("GOOGLE_API_KEY")
+            google_api_key=google_api_key
         )
         
         asyncio.create_task(periodic_cleanup())
@@ -100,9 +78,7 @@ async def lifespan(app: FastAPI):
 
     yield
     
-    executor.shutdown(wait=False)
     model_cache.clear()
-    pipeline_cache.clear()
 
 async def periodic_cleanup():
     while True:
