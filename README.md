@@ -7,7 +7,7 @@ An intelligent document analysis API that extracts precise answers from insuranc
 - **Hybrid Retrieval System**: Combines BM25 keyword matching with semantic vector similarity for superior document retrieval accuracy
 - **Intelligent Caching**: PostgreSQL-backed caching layer eliminates redundant processing, reducing response times for repeated queries by 95%
 - **Serverless-Optimized**: Lightweight architecture using Google's embedding API, deployable on Vercel with minimal cold start times
-- **Accurate Answer Extraction**: Fine-tuned prompts with Gemini 1.5 Pro ensure concise, policy-specific responses
+- **Accurate Answer Extraction**: Fine-tuned prompts with Gemini 2.5 Flash ensure concise, policy-specific responses
 
 ## Technical Architecture
 
